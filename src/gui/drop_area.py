@@ -4,6 +4,7 @@
 右侧：指定类目拖拽区（多个卡片）—— 拖到某个类目卡片强制归该类
 
 设计意图：让用户一眼看到"有两种拖法"，而不是只注意到上面那个大框。
+两栏标题、说明、拖拽目标结构对称，顶部对齐，视觉平衡。
 """
 
 from __future__ import annotations
@@ -18,7 +19,7 @@ class DropArea(QWidget):
     """拖拽区容器：左右两栏并列。
 
     左栏（自动分类）占 5 份宽度，右栏（指定类目）占 7 份。
-    两者视觉层级对等，都有明确的标题和功能说明。
+    两栏结构对称（标题+说明+拖拽目标），顶部对齐，拖拽目标高度接近。
     """
 
     def __init__(self, categories: list, parent=None) -> None:
@@ -45,10 +46,10 @@ class DropArea(QWidget):
         left_layout.addWidget(left_title)
         left_layout.addWidget(left_hint)
 
-        # 复用 DropZone，但让它撑满左栏
+        # 复用 DropZone——高度与右栏卡片栏接近，视觉对齐
         self.drop_zone = DropZone()
-        self.drop_zone.setMinimumHeight(120)
-        left_layout.addWidget(self.drop_zone, stretch=1)
+        self.drop_zone.setMinimumHeight(96)
+        left_layout.addWidget(self.drop_zone)
 
         layout.addWidget(left_wrap, stretch=5)
 
@@ -59,9 +60,9 @@ class DropArea(QWidget):
         right_layout.setContentsMargins(0, 0, 0, 0)
         right_layout.setSpacing(4)
 
-        right_title = QLabel("②  指定类目（拖到对应卡片 = 强制归类）")
+        right_title = QLabel("②  指定类目")
         right_title.setObjectName("DropColumnTitle")
-        right_hint = QLabel("跳过自动分类，直接归到你选的类目")
+        right_hint = QLabel("发票拖到对应卡片，直接归到你选的类目")
         right_hint.setObjectName("DropColumnHint")
         right_layout.addWidget(right_title)
         right_layout.addWidget(right_hint)
@@ -69,7 +70,6 @@ class DropArea(QWidget):
         # 类目卡片栏（复用 CategoryDropBar）
         self.category_bar = CategoryDropBar(self._categories)
         right_layout.addWidget(self.category_bar)
-        right_layout.addStretch()
 
         layout.addWidget(right_wrap, stretch=7)
 
