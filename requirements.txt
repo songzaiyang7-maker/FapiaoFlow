@@ -1,0 +1,5 @@
+PyQt6>=6.6
+pdfplumber>=0.11
+openpyxl>=3.1
+openai>=1.40
+python-dotenv>=1.0

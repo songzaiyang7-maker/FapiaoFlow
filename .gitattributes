@@ -1,0 +1,12 @@
+# 统一换行符：仓库内一律用 LF，checkout 时按系统自动转换
+* text=auto eol=lf
+
+# 二进制文件不做换行符转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.xlsx binary
+*.exe binary

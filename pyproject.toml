@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fapiao-flow"
+version = "0.2.0"
+description = "发票分拣助手 - 拖拽即分类的电子发票报销工具"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "FapiaoFlow Contributors" }]
+keywords = ["invoice", "reimbursement", "fapiao", "pdf", "PyQt"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Chinese (Simplified)",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Accounting",
+]
+dependencies = [
+    "PyQt6>=6.6",
+    "pdfplumber>=0.11",
+    "openpyxl>=3.1",
+    "openai>=1.40",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-qt>=4.4",
+    "ruff>=0.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/songzaiyang7-maker/FapiaoFlow"
+Repository = "https://github.com/songzaiyang7-maker/FapiaoFlow"
+Issues = "https://github.com/songzaiyang7-maker/FapiaoFlow/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = [
+    "E501",  # 行长不限（中文注释容易超）
+    "B008",  # 函数默认参数调用——Qt 的 QModelIndex() 默认参数是标准模式
+    "B904",  # raise from——parser 的 ParseError 转换保持原样更清晰（已在关键处加 from）
+]

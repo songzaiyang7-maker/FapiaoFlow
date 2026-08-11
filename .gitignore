@@ -1,0 +1,47 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+.venv/
+venv/
+env/
+ENV/
+
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# AI 辅助工具的本地配置（不随仓库走）
+.claude/
+.claude
+.zcode/
+
+.env
+.env.local
+
+# 用户本地 session 数据（含发票完整文本/金额，不应进 git）
+/data/
+
+
+# 个人测试发票不进 git（脱敏示例放 tests/fixtures/）
+/*.pdf
+/我的发票/
+/测试发票/
+
+.DS_Store
+Thumbs.db
