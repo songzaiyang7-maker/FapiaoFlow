@@ -34,9 +34,8 @@ from src.core.storage import SessionStore
 from src.core.totals import compute_totals
 from src.core.types import Invoice
 from src.gui.category_dialog import CategoryManagerDialog
-from src.gui.category_drop import CategoryDropBar
 from src.gui.delegates import CategoryDelegate
-from src.gui.drop_zone import DropZone
+from src.gui.drop_area import DropArea
 from src.gui.session_panel import SessionPanel
 from src.gui.styles import APP_STYLE
 from src.gui.table_model import InvoiceTableModel
@@ -87,13 +86,9 @@ class MainWindow(QMainWindow):
         main = QVBoxLayout()
         main.setSpacing(10)
 
-        # 顶部：拖拽区（自动分类）
-        self.drop_zone = DropZone()
-        main.addWidget(self.drop_zone)
-
-        # 拖到具体类目按钮栏
-        self.category_bar = CategoryDropBar(self._categories)
-        main.addWidget(self.category_bar)
+        # 顶部：拖拽区（左右两栏：自动分类 + 指定类目）
+        self.drop_area = DropArea(self._categories)
+        main.addWidget(self.drop_area)
 
         # 操作按钮栏
         btn_row = QHBoxLayout()
@@ -178,8 +173,8 @@ class MainWindow(QMainWindow):
         menu_settings.addAction(self.action_manage_categories)
 
     def _connect_signals(self) -> None:
-        self.drop_zone.paths_selected.connect(self._on_paths_auto)
-        self.category_bar.paths_dropped.connect(self._on_paths_to_category)
+        self.drop_area.drop_zone.paths_selected.connect(self._on_paths_auto)
+        self.drop_area.category_bar.paths_dropped.connect(self._on_paths_to_category)
         self.export_btn.clicked.connect(self._on_export)
         self.clear_btn.clicked.connect(self._on_clear)
         self.session_panel.session_selected.connect(self._on_session_selected)
@@ -268,8 +263,8 @@ class MainWindow(QMainWindow):
 
     def _refresh_after_category_change(self) -> None:
         """类目变更后刷新所有依赖组件。"""
-        # 类目按钮栏
-        self.category_bar.update_categories(self._categories)
+        # 拖拽区（左右两栏：自动分类区不受影响，只刷新右侧类目卡片）
+        self.drop_area.update_categories(self._categories)
         # 表格 delegate
         self.category_delegate.set_categories(self._category_names())
         # 汇总栏

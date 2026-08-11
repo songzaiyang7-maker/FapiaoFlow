@@ -29,11 +29,11 @@ class DropZone(QFrame):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.hint = QLabel("📥  拖入发票 PDF（支持多选 / 文件夹）")
+        self.hint = QLabel("✨  拖入发票 PDF")
         self.hint.setObjectName("DropZoneHint")
         self.hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.sub = QLabel("或")
+        self.sub = QLabel("支持多选 / 文件夹夹拖入")
         self.sub.setObjectName("DropZoneSub")
         self.sub.setAlignment(Qt.AlignmentFlag.AlignCenter)
 

@@ -11,7 +11,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel
+from PyQt6.QtWidgets import QFrame, QHBoxLayout, QLabel, QVBoxLayout
 
 
 class CategoryDropButton(QFrame):
@@ -26,26 +26,33 @@ class CategoryDropButton(QFrame):
         super().__init__(parent)
         self.category_name = category_name
         self.setAcceptDrops(True)
-        self.setMinimumHeight(56)
+        self.setMinimumHeight(64)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setObjectName("CategoryDropButton")
         self.setStyleSheet(f"""
             QFrame#CategoryDropButton {{
                 background-color: {color};
                 border-radius: 8px;
-                border: 1px solid rgba(0,0,0,0.05);
+                border: 1.5px dashed #b0b8c8;
             }}
             QFrame#CategoryDropButton:hover {{
                 background-color: {color};
-                border: 2px solid #4a6fff;
+                border: 2px dashed #4a6fff;
             }}
         """)
-        layout = QHBoxLayout(self)
-        layout.setContentsMargins(12, 8, 12, 8)
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(8, 8, 8, 8)
+        layout.setSpacing(2)
+        # 上行：类目名
         lbl = QLabel(category_name)
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl.setStyleSheet("font-size: 14px; font-weight: 500; color: #2c2c2c; border: none;")
+        lbl.setStyleSheet("font-size: 14px; font-weight: 600; color: #2c2c2c; border: none;")
         layout.addWidget(lbl)
+        # 下行：拖入提示
+        hint = QLabel("📥 拖入到此")
+        hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        hint.setStyleSheet("font-size: 11px; color: #888; border: none;")
+        layout.addWidget(hint)
 
     def dragEnterEvent(self, event) -> None:  # type: ignore[override]
         if event.mimeData().hasUrls():

@@ -62,7 +62,26 @@ QPushButton#PrimaryButton:hover {
     background-color: #3a5fff;
 }
 
-/* 拖拽区 */
+/* 拖拽区容器：左右两栏 */
+QFrame#DropColumn {
+    background-color: transparent;
+    border: none;
+}
+
+QLabel#DropColumnTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2c2c2c;
+    padding: 2px 0;
+}
+
+QLabel#DropColumnHint {
+    font-size: 11px;
+    color: #888;
+    padding-bottom: 4px;
+}
+
+/* 自动分类拖拽区 */
 QFrame#DropZone {
     background-color: #f0f4ff;
     border: 2px dashed #6c8cff;
@@ -75,13 +94,13 @@ QFrame#DropZone:hover {
 }
 
 QLabel#DropZoneHint {
-    font-size: 15px;
+    font-size: 16px;
     color: #4a6fff;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 QLabel#DropZoneSub {
-    font-size: 12px;
+    font-size: 11px;
     color: #888;
 }
 
