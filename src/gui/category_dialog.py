@@ -199,6 +199,11 @@ class CategoryManagerDialog(QDialog):
         btn_row.addStretch()
         left.addLayout(btn_row)
 
+        # 从模板导入按钮（单独一行，突出预设模板功能）
+        self.import_btn = QPushButton("📋 从模板导入")
+        self.import_btn.clicked.connect(self._on_import_from_template)
+        left.addWidget(self.import_btn)
+
         left_widget = QWidget()
         left_widget.setLayout(left)
         left_widget.setFixedWidth(220)
@@ -268,6 +273,58 @@ class CategoryManagerDialog(QDialog):
                 break
         self.edit_panel.name_edit.setFocus()
         self.edit_panel.name_edit.selectAll()
+
+    def _on_import_from_template(self) -> None:
+        """从预设模板导入类目。"""
+        from PyQt6.QtWidgets import QInputDialog
+
+        from src.core.categories import PRESET_CATEGORIES
+
+        # 当前已有的类目名（去重用）
+        existing_names = {c.name for c in self._categories}
+        # 尚未添加的模板
+        available = [p for p in PRESET_CATEGORIES if p["name"] not in existing_names]
+        if not available:
+            QMessageBox.information(self, "无可用模板", "所有预设模板都已添加。")
+            return
+
+        # 弹出选择对话框
+        names_with_count = [
+            f"{p['name']}（{len(p['keywords'])} 个关键词）" for p in available
+        ]
+        choice, ok = QInputDialog.getItem(
+            self,
+            "从模板导入",
+            "选择要导入的预设类目：",
+            names_with_count,
+            0,
+            False,
+        )
+        if not ok:
+            return
+
+        # 找到选中的模板
+        chosen_idx = names_with_count.index(choice)
+        template = available[chosen_idx]
+        # 追加到类目列表
+        new_cat = CategoryDef(
+            name=template["name"],
+            keywords=list(template["keywords"]),
+            color=template["color"],
+            priority=template["priority"],
+        )
+        self._categories.append(new_cat)
+        self._refresh_list()
+        # 选中刚导入的
+        for i in range(self.list_widget.count()):
+            if self.list_widget.item(i).data(Qt.ItemDataRole.UserRole) == len(self._categories) - 1:
+                self.list_widget.setCurrentRow(i)
+                break
+        QMessageBox.information(
+            self, "导入成功",
+            f"已导入「{template['name']}」类目，含 {len(template['keywords'])} 个关键词。\n"
+            f"可在右侧编辑面板进一步调整。",
+        )
 
     def _on_delete(self) -> None:
         """删除当前选中类目。若有发票属于该类，提示选迁移目标。"""

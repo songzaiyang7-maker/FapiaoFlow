@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.core.archiver import archive_invoices
 from src.core.categories import CategoryDef, CategoryStore
 from src.core.exporter import export_to_excel
 from src.core.pipeline import reset_classifier
@@ -96,7 +97,10 @@ class MainWindow(QMainWindow):
         self.clear_btn = QPushButton("清空当前记录")
         self.clear_btn.setObjectName("SecondaryButton")
         self.export_btn = QPushButton("导出 Excel")
+        self.archive_btn = QPushButton("📁 归档 PDF")
+        self.archive_btn.setObjectName("SecondaryButton")
         btn_row.addWidget(self.clear_btn)
+        btn_row.addWidget(self.archive_btn)
         btn_row.addWidget(self.export_btn)
         main.addLayout(btn_row)
 
@@ -171,11 +175,26 @@ class MainWindow(QMainWindow):
         self.action_manage_categories = QAction("类目管理…", self)
         self.action_manage_categories.triggered.connect(self._on_manage_categories)
         menu_settings.addAction(self.action_manage_categories)
+        menu_settings.addSeparator()
+        # OCR 开关（可勾选）
+        from src.core.config import load_ocr_enabled
+        self.action_toggle_ocr = QAction("OCR 识别扫描件", self, checkable=True)
+        self.action_toggle_ocr.setChecked(load_ocr_enabled())
+        self.action_toggle_ocr.toggled.connect(self._on_toggle_ocr)
+        menu_settings.addAction(self.action_toggle_ocr)
+
+    def _on_toggle_ocr(self, enabled: bool) -> None:
+        """切换 OCR 开关。"""
+        import os
+        os.environ["OCR_ENABLED"] = "true" if enabled else "false"
+        label = "开启" if enabled else "关闭"
+        self.status.showMessage(f"OCR 已{label}（下次处理扫描件时生效）", 5000)
 
     def _connect_signals(self) -> None:
         self.drop_area.drop_zone.paths_selected.connect(self._on_paths_auto)
         self.drop_area.category_bar.paths_dropped.connect(self._on_paths_to_category)
         self.export_btn.clicked.connect(self._on_export)
+        self.archive_btn.clicked.connect(self._on_archive)
         self.clear_btn.clicked.connect(self._on_clear)
         self.session_panel.session_selected.connect(self._on_session_selected)
         self.session_panel.new_session_requested.connect(self._on_new_session)
@@ -519,6 +538,55 @@ class MainWindow(QMainWindow):
                 self.status.showMessage(f"打开文件夹失败：{e}")
         else:
             self.status.showMessage(f"已导出: {output}")
+
+    def _on_archive(self) -> None:
+        """归档 PDF：按类目复制到子文件夹。"""
+        invoices = self.model.all_invoices()
+        if not invoices:
+            QMessageBox.information(self, "无数据", "当前记录没有发票可归档。")
+            return
+        from PyQt6.QtWidgets import QFileDialog
+        now = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        default_dir = f"归档_{now}"
+        path = QFileDialog.getExistingDirectory(
+            self, "选择归档输出文件夹", default_dir
+        )
+        if not path:
+            return
+        try:
+            output = archive_invoices(invoices, path, self._categories)
+        except Exception as e:
+            QMessageBox.critical(self, "归档失败", str(e))
+            return
+        # 统计各类目归档数
+        from collections import Counter
+        cat_counts: Counter = Counter()
+        for inv in invoices:
+            if inv.category:
+                cat_counts[inv.category] += 1
+        summary = " / ".join(
+            f"{cat.name} {cat_counts.get(cat.name, 0)}" for cat in self._categories
+            if cat_counts.get(cat.name, 0) > 0
+        )
+        ret = QMessageBox.question(
+            self,
+            "归档成功",
+            f"已归档到：\n{output}\n\n{summary}\n\n是否打开归档文件夹？",
+        )
+        if ret == QMessageBox.StandardButton.Yes:
+            import subprocess
+            import sys
+            try:
+                if sys.platform == "win32":
+                    subprocess.run(["explorer", str(output)], check=False)
+                elif sys.platform == "darwin":
+                    subprocess.Popen(["open", str(output)])
+                else:
+                    subprocess.Popen(["xdg-open", str(output)])
+            except Exception as e:
+                self.status.showMessage(f"打开文件夹失败：{e}")
+        else:
+            self.status.showMessage(f"已归档到: {output}")
 
     def _on_clear(self) -> None:
         if not self.model.all_invoices():

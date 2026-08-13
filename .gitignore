@@ -46,5 +46,8 @@ htmlcov/
 # 合成发票 PDF（由 scripts/generate_sample_invoices.py 本地生成，不进 git）
 /sample_invoices/
 
+# 临时测试文件
+/scan_invoice.png
+
 .DS_Store
 Thumbs.db
